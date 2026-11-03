@@ -39,6 +39,7 @@ src/
     (app)/(tabs)/         Início, Alimentação, Treinos, Progresso, Perfil
     (app)/receita/[id]    Detalhe da receita
     (app)/treino/[id]     Detalhe do exercício
+    (app)/questionario    Questionário inicial (abre sozinho no 1º acesso; editável pelo Perfil)
   components/ui/          Componentes base (texto, botão, campo, card, chips, estados)
   components/cards/       Componentes de domínio (receita, exercício, hábito, semana)
   hooks/queries.ts        Hooks de dados (TanStack Query) e progresso derivado
@@ -73,4 +74,4 @@ O SQL é gerado por `supabase/seed/receitas_brasileiras.py` (edite a lista de re
 
 ## Fora desta etapa
 
-Pagamentos/assinatura, onboarding (questionário), recuperação de senha, plano semanal e lista de compras, metas e medidas, painel administrativo.
+Pagamentos/assinatura, recuperação de senha, plano semanal e lista de compras, metas e medidas, painel administrativo.

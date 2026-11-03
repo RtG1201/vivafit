@@ -21,17 +21,22 @@ import { useAnnouncement, useExercises, useProfile, useProgress, useToggleHabit 
 import { formatLongDate, greetingFor, weekDates } from '@/lib/dates';
 import { motivationalMessage, WEEKLY_ACTIVE_DAYS_GOAL } from '@/lib/gamification';
 import { equipmentLabel, LEVELS } from '@/lib/labels';
+import { fitsEquipment, isBeginner } from '@/lib/onboarding';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, spacing } from '@/theme';
 import type { Exercise, Profile } from '@/types/database';
 
-/** Sugere um exercício compatível com o tempo disponível e o nível do perfil. */
+/** Sugere um exercício compatível com o tempo, o nível e os equipamentos do perfil. */
 function pickSuggestion(exercises: Exercise[], profile: Profile | null | undefined): Exercise | null {
   if (!exercises.length) return null;
   const minutes = profile?.minutes_available ?? null;
-  const beginner = !profile?.activity_level || ['sedentaria', 'leve', 'comecando'].includes(profile.activity_level);
+  const beginner = isBeginner(profile?.activity_level);
+  const owned = profile?.equipment ?? [];
   const pool = exercises.filter(
-    (e) => (!beginner || e.level === 'iniciante') && (minutes == null || e.duration_minutes <= minutes),
+    (e) =>
+      (!beginner || e.level === 'iniciante') &&
+      (minutes == null || e.duration_minutes <= minutes) &&
+      fitsEquipment(e, owned),
   );
   const list = pool.length ? pool : exercises;
   const dayIndex = Math.floor(Date.now() / 86_400_000) % list.length;

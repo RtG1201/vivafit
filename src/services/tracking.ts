@@ -95,3 +95,15 @@ export async function fetchPlanningCounts(): Promise<{ mealsPlanned: number; goa
   if (goals.error) throw goals.error;
   return { mealsPlanned: meals.count ?? 0, goalsDone: goals.count ?? 0 };
 }
+
+/** Salva as respostas do questionário inicial e marca o perfil como respondido. */
+export async function updateProfilePreferences(
+  userId: string,
+  answers: Pick<Profile, 'goals' | 'activity_level' | 'minutes_available' | 'equipment' | 'diet_prefs'>,
+) {
+  const { error } = await requireSupabase()
+    .from('profiles')
+    .update({ ...answers, onboarded: true })
+    .eq('id', userId);
+  if (error) throw error;
+}

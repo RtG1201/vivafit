@@ -3,11 +3,12 @@ import { useMemo } from 'react';
 
 import { toISODate } from '@/lib/dates';
 import { computeAchievements, currentStreak, longestStreak } from '@/lib/gamification';
+import type { OnboardingAnswers } from '@/lib/onboarding';
 import { useAuth } from '@/providers/AuthProvider';
 import * as content from '@/services/content';
 import * as favorites from '@/services/favorites';
 import * as tracking from '@/services/tracking';
-import type { Habit, HabitLog } from '@/types/database';
+import type { Habit, HabitLog, Profile } from '@/types/database';
 
 export const queryKeys = {
   profile: (userId: string) => ['profile', userId] as const,
@@ -116,6 +117,19 @@ export function useUpdateName() {
   return useMutation({
     mutationFn: (name: string) => tracking.updateProfileName(userId, name),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.profile(userId) }),
+  });
+}
+
+export function useUpdatePreferences() {
+  const userId = useUserId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (answers: OnboardingAnswers) => tracking.updateProfilePreferences(userId, answers),
+    onSuccess: (_data, answers) => {
+      // Atualiza o cache na hora: o redirecionamento do questionário depende de `onboarded`.
+      qc.setQueryData<Profile | null>(queryKeys.profile(userId), (old) => (old ? { ...old, ...answers, onboarded: true } : old));
+      return qc.invalidateQueries({ queryKey: queryKeys.profile(userId) });
+    },
   });
 }
 

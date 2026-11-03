@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
+import { router } from 'expo-router';
 import { Linking, StyleSheet, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/cards';
@@ -7,7 +8,8 @@ import { AppText, Badge, Button, Card, ErrorState, LoadingState, Overline, Scree
 import { useProfile, useUpdateName } from '@/hooks/queries';
 import { confirmAction } from '@/lib/confirm';
 import { env } from '@/lib/env';
-import { PLAN_LABEL } from '@/lib/labels';
+import { PLAN_LABEL, tagLabel } from '@/lib/labels';
+import { activityLabel, equipmentOptionLabel, goalLabel, joinPt } from '@/lib/onboarding';
 import { useAuth } from '@/providers/AuthProvider';
 import { authErrorMessage, deleteOwnAccount } from '@/services/auth';
 import { colors, spacing } from '@/theme';
@@ -141,21 +143,25 @@ export default function ProfileScreen() {
         ) : null}
       </Card>
 
-      {/* Preferências vindas do perfil (preenchidas no onboarding — próxima etapa) */}
+      {/* Preferências do questionário inicial: personalizam treinos e receitas */}
       <SectionHeader title="Suas preferências" />
       <Card tone="muted">
-        {profile.data?.onboarded ? (
+        {profile.data ? (
           <>
-            <Info label="Objetivos" value={profile.data.goals.join(', ')} />
-            <Info label="Restrições" value={profile.data.diet_prefs.join(', ')} />
+            <Info label="Objetivos" value={joinPt(profile.data.goals.map(goalLabel))} />
+            <Info label="Rotina de exercícios" value={profile.data.activity_level ? activityLabel(profile.data.activity_level) : ''} />
             <Info label="Tempo por dia" value={profile.data.minutes_available ? `${profile.data.minutes_available} min` : ''} />
+            <Info label="Equipamentos" value={joinPt(profile.data.equipment.map(equipmentOptionLabel))} />
+            <Info label="Alimentação" value={joinPt(profile.data.diet_prefs.map(tagLabel))} />
           </>
-        ) : (
-          <AppText variant="small">
-            Você ainda não respondeu o questionário inicial (objetivos, restrições, tempo e equipamentos). Ele chega na
-            próxima etapa do app e vai personalizar receitas e treinos.
-          </AppText>
-        )}
+        ) : null}
+        <Button
+          label="Editar preferências"
+          icon="options-outline"
+          size="md"
+          variant="secondary"
+          onPress={() => router.push({ pathname: '/questionario', params: { editar: '1' } })}
+        />
       </Card>
 
       {/* Assinatura */}

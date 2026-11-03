@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LockedItem, RecipeCard, ScreenHeader } from '@/components/cards';
 import { AppText, ChipGroup, ChipRow, EmptyState, ErrorState, ListCard, LoadingState, SectionHeader } from '@/components/ui';
-import { useFavoriteRecipeIds, usePremiumTeasers, useRecipes, useToggleFavorite } from '@/hooks/queries';
+import { useFavoriteRecipeIds, usePremiumTeasers, useProfile, useRecipes, useToggleFavorite } from '@/hooks/queries';
 import { DIET_TAGS, MEAL_TYPES } from '@/lib/labels';
 import { EMPTY_FILTERS, filterRecipes, hasActiveFilters, QUICK_MINUTES, type MealFilter, type RecipeFilters } from '@/lib/recipes';
 import { colors, fonts, layout, radius, spacing } from '@/theme';
@@ -29,6 +29,15 @@ export default function FoodScreen() {
   const favorites = useFavoriteRecipeIds();
   const toggleFavorite = useToggleFavorite();
   const [filters, setFilters] = useState<RecipeFilters>(EMPTY_FILTERS);
+
+  // Preferências do questionário entram como filtros iniciais (uma vez; a usuária pode desmarcar).
+  const profile = useProfile();
+  const [seeded, setSeeded] = useState(false);
+  if (!seeded && profile.data) {
+    const prefs = profile.data.diet_prefs;
+    setSeeded(true);
+    if (prefs.length) setFilters((f) => ({ ...f, tags: prefs }));
+  }
 
   const sorted = useMemo(
     () =>
