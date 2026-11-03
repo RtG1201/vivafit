@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { addDays, toISODate } from '@/lib/dates';
+import { toISODate } from '@/lib/dates';
 import { computeAchievements, currentStreak, longestStreak } from '@/lib/gamification';
 import { useAuth } from '@/providers/AuthProvider';
 import * as content from '@/services/content';
 import * as favorites from '@/services/favorites';
 import * as tracking from '@/services/tracking';
-import type { Habit } from '@/types/database';
+import type { Habit, HabitLog } from '@/types/database';
 
 export const queryKeys = {
   profile: (userId: string) => ['profile', userId] as const,
@@ -23,9 +23,6 @@ export const queryKeys = {
   planning: (userId: string) => ['planning-counts', userId] as const,
   favorites: (userId: string) => ['recipe-favorites', userId] as const,
 };
-
-/** Janela de histórico usada para sequência, calendário e conquistas. */
-const HISTORY_DAYS = 120;
 
 function useUserId() {
   const { user } = useAuth();
@@ -64,14 +61,14 @@ export function useHabitLogs() {
   const userId = useUserId();
   return useQuery({
     queryKey: queryKeys.habitLogs(userId),
-    queryFn: () => tracking.fetchHabitLogsSince(toISODate(addDays(new Date(), -HISTORY_DAYS))),
+    queryFn: tracking.fetchHabitLogs,
     enabled: !!userId,
   });
 }
 
 export function useActivityLogs() {
   const userId = useUserId();
-  return useQuery({ queryKey: queryKeys.activity(userId), queryFn: () => tracking.fetchActivityLogs(), enabled: !!userId });
+  return useQuery({ queryKey: queryKeys.activity(userId), queryFn: tracking.fetchActivityLogs, enabled: !!userId });
 }
 
 export function usePlanningCounts() {
@@ -79,12 +76,28 @@ export function usePlanningCounts() {
   return useQuery({ queryKey: queryKeys.planning(userId), queryFn: tracking.fetchPlanningCounts, enabled: !!userId });
 }
 
+/** Marca/desmarca hábito de hoje com atualização otimista (o check muda na hora). */
 export function useToggleHabit() {
   const userId = useUserId();
   const qc = useQueryClient();
+  const key = queryKeys.habitLogs(userId);
   return useMutation({
     mutationFn: ({ habit, done }: { habit: Habit; done: boolean }) => tracking.setHabitDone(habit, done),
-    onSettled: () => qc.invalidateQueries({ queryKey: queryKeys.habitLogs(userId) }),
+    onMutate: async ({ habit, done }) => {
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<HabitLog[]>(key) ?? [];
+      const today = toISODate(new Date());
+      const others = previous.filter((l) => !(l.habit_id === habit.id && l.date === today));
+      const next = done
+        ? [...others, { id: `otimista-${habit.id}`, user_id: userId, habit_id: habit.id, date: today, value: habit.target }]
+        : others;
+      qc.setQueryData(key, next);
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx) qc.setQueryData(key, ctx.previous);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: key }),
   });
 }
 

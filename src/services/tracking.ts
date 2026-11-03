@@ -24,11 +24,27 @@ export async function fetchHabits(): Promise<Habit[]> {
   return data ?? [];
 }
 
-/** Registros de hábitos a partir de uma data (inclusive). */
-export async function fetchHabitLogsSince(sinceISO: string): Promise<HabitLog[]> {
-  const { data, error } = await requireSupabase().from('habit_logs').select('*').gte('date', sinceISO);
-  if (error) throw error;
-  return data ?? [];
+/** Linhas por página: abaixo do limite padrão de 1000 linhas por consulta do Supabase. */
+const PAGE_SIZE = 500;
+
+/** Busca todas as páginas de uma consulta ordenada (o histórico completo alimenta as conquistas). */
+async function fetchAllPages<T>(
+  page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
+): Promise<T[]> {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await page(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    rows.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) return rows;
+  }
+}
+
+/** Todos os registros de hábitos da usuária. */
+export function fetchHabitLogs(): Promise<HabitLog[]> {
+  return fetchAllPages((from, to) =>
+    requireSupabase().from('habit_logs').select('*').order('date').order('id').range(from, to),
+  );
 }
 
 /** Marca (ou desmarca) um hábito como feito hoje. */
@@ -45,15 +61,17 @@ export async function setHabitDone(habit: Habit, done: boolean, date: string = t
   }
 }
 
-export async function fetchActivityLogs(limit = 400): Promise<ActivityLog[]> {
-  const { data, error } = await requireSupabase()
-    .from('activity_logs')
-    .select('*')
-    .order('date', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data ?? [];
+/** Todas as atividades da usuária, da mais recente para a mais antiga. */
+export function fetchActivityLogs(): Promise<ActivityLog[]> {
+  return fetchAllPages((from, to) =>
+    requireSupabase()
+      .from('activity_logs')
+      .select('*')
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: false })
+      .order('id')
+      .range(from, to),
+  );
 }
 
 export async function logActivity(input: { title: string; minutes: number; exerciseId?: string | null }) {

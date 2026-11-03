@@ -162,6 +162,8 @@ export type Database = {
       has_role: { Args: { _user_id: string; _role: AppRole }; Returns: boolean };
       is_premium: { Args: { _user_id: string }; Returns: boolean };
       premium_teasers: { Args: Record<string, never>; Returns: PremiumTeaser[] };
+      /** Apaga os dados e a conta de quem chamou (migração 20261103120000). */
+      delete_own_account: { Args: Record<string, never>; Returns: undefined };
     };
     Enums: { app_role: AppRole };
     CompositeTypes: { [_ in never]: never };

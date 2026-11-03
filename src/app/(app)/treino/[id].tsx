@@ -27,9 +27,12 @@ export default function ExerciseDetailScreen() {
   const e = exercise.data;
   const level = LEVELS[e.level] ?? LEVELS.iniciante;
 
-  async function markDone() {
-    await logActivity.mutateAsync({ title: e.name, minutes: e.duration_minutes, exerciseId: e.id });
-    setLogged(true);
+  function markDone() {
+    // O erro aparece na tela via logActivity.error (sem promessa rejeitada solta).
+    logActivity.mutate(
+      { title: e.name, minutes: e.duration_minutes, exerciseId: e.id },
+      { onSuccess: () => setLogged(true) },
+    );
   }
 
   return (
@@ -59,7 +62,7 @@ export default function ExerciseDetailScreen() {
           label="Assistir demonstração"
           icon="play-circle-outline"
           variant="secondary"
-          onPress={() => Linking.openURL(e.video_url!)}
+          onPress={() => Linking.openURL(e.video_url!).catch(() => undefined)}
         />
       ) : null}
 

@@ -17,7 +17,12 @@ export async function fetchRecipes(): Promise<Recipe[]> {
 }
 
 export async function fetchRecipe(id: string): Promise<Recipe | null> {
-  const { data, error } = await requireSupabase().from('recipes').select('*').eq('id', id).maybeSingle();
+  const { data, error } = await requireSupabase()
+    .from('recipes')
+    .select('*')
+    .eq('id', id)
+    .eq('published', true)
+    .maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -33,7 +38,12 @@ export async function fetchExercises(): Promise<Exercise[]> {
 }
 
 export async function fetchExercise(id: string): Promise<Exercise | null> {
-  const { data, error } = await requireSupabase().from('exercises').select('*').eq('id', id).maybeSingle();
+  const { data, error } = await requireSupabase()
+    .from('exercises')
+    .select('*')
+    .eq('id', id)
+    .eq('published', true)
+    .maybeSingle();
   if (error) throw error;
   return data;
 }

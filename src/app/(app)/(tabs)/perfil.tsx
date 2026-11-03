@@ -1,12 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/cards';
 import { AppText, Badge, Button, Card, ErrorState, LoadingState, Overline, Screen, SectionHeader, TextField } from '@/components/ui';
 import { useProfile, useUpdateName } from '@/hooks/queries';
+import { confirmAction } from '@/lib/confirm';
+import { env } from '@/lib/env';
 import { PLAN_LABEL } from '@/lib/labels';
 import { useAuth } from '@/providers/AuthProvider';
+import { authErrorMessage, deleteOwnAccount } from '@/services/auth';
 import { colors, spacing } from '@/theme';
 
 const PREMIUM_FEATURES = [
@@ -23,22 +26,51 @@ export default function ProfileScreen() {
   const [name, setName] = useState('');
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const plan = profile.data?.plan ?? 'free';
   const initial = (profile.data?.name || user?.email || '?').trim().charAt(0).toUpperCase();
 
-  function confirmSignOut() {
-    Alert.alert('Sair da conta?', 'Você pode entrar de novo quando quiser.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: () => signOut() },
-    ]);
+  async function confirmSignOut() {
+    const ok = await confirmAction({
+      title: 'Sair da conta?',
+      message: 'Você pode entrar de novo quando quiser.',
+      confirmLabel: 'Sair',
+      destructive: true,
+    });
+    if (ok) await signOut();
   }
 
-  async function saveName() {
+  async function confirmDeleteAccount() {
+    const ok = await confirmAction({
+      title: 'Excluir sua conta?',
+      message:
+        'Seus hábitos, treinos registrados, favoritos e dados de perfil serão apagados para sempre. Essa ação não pode ser desfeita.',
+      confirmLabel: 'Excluir conta',
+      destructive: true,
+    });
+    if (!ok) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      // Ao terminar, a sessão some e as rotas protegidas levam para as boas-vindas.
+      await deleteOwnAccount();
+    } catch (e) {
+      setDeleteError(authErrorMessage(e));
+      setDeleting(false);
+    }
+  }
+
+  function saveName() {
     if (name.trim().length < 2) return;
-    await updateName.mutateAsync(name);
-    setEditing(false);
-    setSaved(true);
+    // O erro aparece no campo via updateName.error.
+    updateName.mutate(name, {
+      onSuccess: () => {
+        setEditing(false);
+        setSaved(true);
+      },
+    });
   }
 
   return (
@@ -158,6 +190,32 @@ export default function ProfileScreen() {
       </Card>
 
       <Button label="Sair da conta" variant="danger" icon="log-out-outline" onPress={confirmSignOut} />
+
+      {/* Conta e privacidade */}
+      <SectionHeader title="Conta e privacidade" />
+      {env.privacyPolicyUrl ? (
+        <Button
+          label="Política de Privacidade"
+          icon="document-text-outline"
+          size="md"
+          variant="secondary"
+          onPress={() => Linking.openURL(env.privacyPolicyUrl).catch(() => undefined)}
+        />
+      ) : null}
+      <Button
+        label="Excluir minha conta"
+        icon="trash-outline"
+        size="md"
+        variant="secondary"
+        onPress={confirmDeleteAccount}
+        loading={deleting}
+        accessibilityHint="Apaga sua conta e todos os seus dados de forma permanente."
+      />
+      {deleteError ? (
+        <AppText variant="caption" color="danger" accessibilityRole="alert">
+          {deleteError}
+        </AppText>
+      ) : null}
     </Screen>
   );
 }

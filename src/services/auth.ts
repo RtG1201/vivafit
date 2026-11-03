@@ -33,6 +33,18 @@ export async function signUpWithEmail(name: string, email: string, password: str
   return { needsConfirmation: !data.session };
 }
 
+/**
+ * Exclui a conta e todos os dados da usuária (função delete_own_account no banco)
+ * e encerra a sessão neste aparelho.
+ */
+export async function deleteOwnAccount() {
+  const db = requireSupabase();
+  const { error } = await db.rpc('delete_own_account');
+  if (error) throw error;
+  // A conta já não existe no servidor: limpa só a sessão local.
+  await db.auth.signOut({ scope: 'local' });
+}
+
 export function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 }

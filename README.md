@@ -63,6 +63,9 @@ O app usa o banco **existente** do projeto Leve em Casa (Lovable Cloud / Supabas
 | Arquivo | O que faz |
 |---|---|
 | `supabase/migrations/20261101120000_receitas_brasileiras.sql` | Adiciona `servings` e `image_url` em `recipes`, cria `recipe_favorites` com RLS, **despublica** (não apaga) as receitas antigas e cadastra 24 receitas brasileiras simples. |
+| `supabase/migrations/20261103120000_excluir_conta.sql` | Cria a função `delete_own_account()`, usada pelo botão **Excluir minha conta** do Perfil: apaga só os dados de quem chamou e a conta de login. Sem ela aplicada, o botão mostra erro. |
+
+**Política de Privacidade:** preencha `EXPO_PUBLIC_PRIVACY_POLICY_URL` no `.env.local` com o endereço público da política; o link aparece no Perfil.
 
 O SQL é gerado por `supabase/seed/receitas_brasileiras.py` (edite a lista de receitas ali e rode `python supabase/seed/receitas_brasileiras.py`). O script é idempotente: rodar de novo não duplica receitas.
 
