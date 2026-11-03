@@ -1,5 +1,5 @@
 /**
- * Paleta Viva Leve.
+ * Paleta Vivafit.
  * Cores-base definidas pela marca + tons derivados para texto, superfícies e
  * estados. Pares de texto/fundo foram escolhidos para contraste mínimo de 4.5:1.
  */

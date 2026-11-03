@@ -20,7 +20,7 @@ export default function WelcomeScreen() {
       <View style={styles.hero}>
         <BrandMark size={112} />
         <AppText variant="overline" color="sageDeep" style={styles.kicker}>
-          Viva Leve
+          Vivafit
         </AppText>
         <AppText variant="hero" align="center" accessibilityRole="header">
           Cuidar de você, um dia de cada vez.

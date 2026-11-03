@@ -1,4 +1,4 @@
--- Viva Leve · Alimentação brasileira, caseira e simples
+-- Vivafit · Alimentação brasileira, caseira e simples
 -- Migração NÃO destrutiva: nenhum DELETE, nenhum DROP, nenhum dado de usuária alterado.
 begin;
 

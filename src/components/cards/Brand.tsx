@@ -23,7 +23,7 @@ export function BrandMark({ size = 96 }: { size?: number }) {
 export function Wordmark() {
   return (
     <AppText variant="heading" accessibilityRole="header">
-      Viva Leve
+      Vivafit
     </AppText>
   );
 }

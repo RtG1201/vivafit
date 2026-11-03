@@ -1,4 +1,4 @@
--- Viva Leve · Exclusão de conta pelo próprio app (exigência da App Store e do Google Play)
+-- Vivafit · Exclusão de conta pelo próprio app (exigência da App Store e do Google Play)
 -- Cria a função delete_own_account(): apaga SOMENTE os dados de quem chamou (auth.uid())
 -- e depois a própria conta em auth.users. Não altera nenhuma outra tabela nem dado de outras usuárias.
 begin;

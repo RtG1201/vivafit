@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Viva Leve",
+    "name": "Vivafit",
     "slug": "vita-leve",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.vivaleve.app"
+      "bundleIdentifier": "com.vivafit.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.vivaleve.app"
+      "package": "com.vivafit.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -38,7 +38,7 @@
         }
       ]
     ],
-    "scheme": "vivaleve",
+    "scheme": "vivafit",
     "experiments": {
       "typedRoutes": true
     },

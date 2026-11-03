@@ -1,4 +1,4 @@
-# Viva Leve
+# Vivafit
 
 Aplicativo mobile (Android e iOS) de alimentação, exercícios em casa e acompanhamento de hábitos para mulheres iniciantes.
 
@@ -58,7 +58,7 @@ O app usa o banco **existente** do projeto Leve em Casa (Lovable Cloud / Supabas
 - Dados da própria usuária (protegidos por RLS): `profiles`, `habits`, `habit_logs`, `activity_logs`; contagens de `meal_plans` e `goals`.
 - O cadastro aciona o gatilho já existente que cria perfil e hábitos iniciais.
 
-### Migrações aplicadas pelo Viva Leve
+### Migrações aplicadas pelo Vivafit
 
 | Arquivo | O que faz |
 |---|---|

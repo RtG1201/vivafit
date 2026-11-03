@@ -1,5 +1,5 @@
 {
-  "name": "viva-leve",
+  "name": "vivafit",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
@@ -8,13 +8,13 @@
     "@expo/vector-icons": "^15.0.2",
     "@supabase/supabase-js": "^2.118.0",
     "@tanstack/react-query": "^5.105.0",
-    "expo": "~58.0.21",
+    "expo": "~58.0.22",
     "expo-constants": "~58.0.14",
     "expo-font": "~58.0.11",
     "expo-linking": "~58.0.15",
-    "expo-router": "~58.0.28",
+    "expo-router": "~58.0.29",
     "expo-splash-screen": "~58.0.12",
-    "expo-sqlite": "~58.0.14",
+    "expo-sqlite": "~58.0.15",
     "expo-status-bar": "~58.0.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
